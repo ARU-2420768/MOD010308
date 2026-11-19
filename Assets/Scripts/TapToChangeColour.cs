@@ -2,67 +2,29 @@ using UnityEngine;
 
 public class TapToChangeColour : MonoBehaviour
 {
-
-    public enum CubeColour
-    {
-        Red,
-        Yellow,
-        Green,
-        Blue,
-        Black
-    }
-
-    [SerializeField] private CubeColour currentColour = CubeColour.Red;
-
-    private Renderer cubeRenderer;
-    
+    private PuzzleCube puzzleCube;
 
     private void Awake()
     {
-        cubeRenderer = GetComponent<Renderer>();
-        UpdateVisuals();
-    }
-
-    private void OnMouseDown()
-    {
-        LoopThroughColours();
-    }
-
-    public void LoopThroughColours()
-    {
-        // cast to CubeColour at correct position (CubeColour)0 = Red
-        currentColour = (CubeColour)(((int)currentColour + 1) % 5);
-        UpdateVisuals();
-    }
-
-    private void UpdateVisuals()
-    {
-        switch (currentColour)
+        puzzleCube = GetComponent<PuzzleCube>();
+        if (puzzleCube == null)
         {
-            case CubeColour.Red:
-                cubeRenderer.material.color = Color.red;
-                break;
-
-            case CubeColour.Yellow:
-                cubeRenderer.material.color = Color.yellow;
-                break;
-
-            case CubeColour.Green:
-                cubeRenderer.material.color = Color.green;
-                break;
-
-            case CubeColour.Blue:
-                cubeRenderer.material.color = Color.blue;
-                break;
-
-            case CubeColour.Black:
-                cubeRenderer.material.color = Color.black;
-                break;
+            Debug.LogError($"PuzzleCube missing from {gameObject.name}");
         }
     }
 
-    public CubeColour GetCurrentColour()
+
+    public void LoopThroughColours()
     {
-        return currentColour;
+        puzzleCube.Data.state = (CubeState)(((int)puzzleCube.Data.state + 1) % 5);
+
+        puzzleCube.UpdateVisual();
+
+        Debug.Log($"New State: {puzzleCube.Data.state}");
+
+        GameManager.Instance.CheckWin();
     }
+
 }
+
+

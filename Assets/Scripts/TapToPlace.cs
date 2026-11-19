@@ -10,6 +10,7 @@ public class TapToPlace : MonoBehaviour
 
     [Tooltip("The AR Raycast Manager on the XR Origin.")]
     [SerializeField] private ARRaycastManager raycastManager;
+    [SerializeField] private ARPlaneManager planeManager;
     [Tooltip("The model to place. It is hidden until you tap.")]   
     [SerializeField] private Transform model;
     [Tooltip("Distance in meters to offset the model from the hit point.")]
@@ -74,6 +75,13 @@ public class TapToPlace : MonoBehaviour
             model.SetPositionAndRotation(spawnPosition, hitPose.rotation);
             model.gameObject.SetActive(true);
             _isModelSet = true;
+            raycastManager.enabled = false;
+            planeManager.enabled = false;
+
+            foreach (var plane in planeManager.trackables)
+            {
+                plane.gameObject.SetActive(false);
+            }
         }
     }
 }

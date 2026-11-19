@@ -6,6 +6,10 @@ TagManager:
   tags:
   - Player1Object
   - Player2Object
+  - ColourCube
+  - ChangePlayerCube
+  - StartGame
+  - ChooseLevel
   layers:
   - Default
   - TransparentFX
