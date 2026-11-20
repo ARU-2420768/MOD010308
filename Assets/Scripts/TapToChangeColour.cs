@@ -18,7 +18,7 @@ public class TapToChangeColour : MonoBehaviour
     {
         puzzleCube.Data.state = (CubeState)(((int)puzzleCube.Data.state + 1) % 5);
 
-        puzzleCube.UpdateVisual();
+        puzzleCube.ShowColour();
 
         Debug.Log($"New State: {puzzleCube.Data.state}");
 

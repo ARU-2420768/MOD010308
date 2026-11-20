@@ -12,28 +12,40 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject cubePrefab;
     [SerializeField] private Transform player1Table;
     [SerializeField] private Transform player2Table;
-    [SerializeField] private PuzzleDefinition puzzleDefinition;
+    [SerializeField] private PuzzleDefinition[] puzzleDefinitions;
+
+    private int currentPuzzleIndex = 0;
+    private PuzzleDefinition puzzleDefinition;
 
 
     public PuzzleDefinition _puzzleDefinition => puzzleDefinition;
     private List<PuzzleCube> player1Cubes = new();
     private List<PuzzleCube> player2Cubes = new();
+    private IPuzzleFeedback feedbackSystem;
 
     public void Awake()
     {
-        if(gameManager == null)
+        if (gameManager == null)
             gameManager = this;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
+        if (puzzleDefinitions == null || puzzleDefinitions.Length == 0)
+        {
+            Debug.LogError("No PuzzleDefinitions assigned.");
+            return;
+        }
+        puzzleDefinition = puzzleDefinitions[currentPuzzleIndex];
 
+        ConfigurePuzzleType();
     }
 
-    public void ChangePuzzleDefinition(PuzzleDefinition _puzzleDefinition)
+    public void ChangePuzzleDefinition(PuzzleDefinition newPuzzle)
     {
-        puzzleDefinition = _puzzleDefinition;
+        puzzleDefinition = newPuzzle;
+        ConfigurePuzzleType();
         StartGame();
     }
 
@@ -54,14 +66,40 @@ public class GameManager : MonoBehaviour
     }
 
 
+    public void LoadNextPuzzle()
+    {
+        currentPuzzleIndex++;
+
+        if (currentPuzzleIndex >= puzzleDefinitions.Length)
+        {
+            Debug.Log("All puzzles completed!");
+
+            currentPuzzleIndex = 0; // optional restart
+
+            // TODO:
+            // Show victory screen
+            // Return to menu
+            // Restart sequence
+            return;
+        }
+
+        ChangePuzzleDefinition(
+            puzzleDefinitions[currentPuzzleIndex]
+        );
+
+        Debug.Log(
+            $"Loaded puzzle: {puzzleDefinition.gameName}"
+        );
+    }
+
     public void StartGame()
     {
         ClearBoards();
         BoardDefinition solutionBoard = GenerateSolutionBoard();
         CreatePlayerBoard(player1Table, solutionBoard, player1Cubes);
         CreatePlayerBoard(player2Table, solutionBoard, player2Cubes);
-//        CreatePlayerBoard(player1Table, puzzleDefinition.solutionBoardDefinition, player1Cubes);
-//        CreatePlayerBoard(player2Table, puzzleDefinition.solutionBoardDefinition, player2Cubes);
+        //        CreatePlayerBoard(player1Table, puzzleDefinition.solutionBoardDefinition, player1Cubes);
+        //        CreatePlayerBoard(player2Table, puzzleDefinition.solutionBoardDefinition, player2Cubes);
         SetupPuzzle();
         SwitchPlayer();
     }
@@ -71,7 +109,7 @@ public class GameManager : MonoBehaviour
         //SetBoardVisible(player1Cubes, !GameManager.Instance.CanCurrentPlayerChangeColours());
         //SetBoardVisible(player2Cubes, !GameManager.Instance.CanCurrentPlayerChangeColours());
         SetBoardVisible(player1Cubes, playerManager.IsPlayer1Active());
-        SetBoardVisible(player2Cubes, !playerManager.IsPlayer1Active());       
+        SetBoardVisible(player2Cubes, !playerManager.IsPlayer1Active());
     }
 
     private BoardDefinition GenerateSolutionBoard()
@@ -94,11 +132,28 @@ public class GameManager : MonoBehaviour
         return board;
     }
 
+    private void ConfigurePuzzleType()
+    {
+        switch (puzzleDefinition.puzzleType)
+        {
+            case PuzzleType.ColourMatch:
+                feedbackSystem = new ColourFeedback();
+                break;
+
+            case PuzzleType.SoundMatch:
+                feedbackSystem = new SoundFeedback();
+                break;
+
+            case PuzzleType.HapticMatch:
+                feedbackSystem = new HapticFeedback();
+                break;
+        }
+    }
 
     private void SetBoardVisible(List<PuzzleCube> cubes, bool visible)
     {
         foreach (PuzzleCube cube in cubes)
-        {   
+        {
             cube.GetComponent<Renderer>().enabled = visible;
         }
     }
@@ -132,7 +187,7 @@ public class GameManager : MonoBehaviour
             cubes[cubeIndex].Data.state = GetRandomColourState();
 
             // Refresh visual
-            cubes[cubeIndex].UpdateVisual();
+            cubes[cubeIndex].ShowColour();
         }
     }
 
@@ -167,8 +222,103 @@ public class GameManager : MonoBehaviour
         return (CubeState)nextState;
     }
 
-
     public bool CheckWin()
+    {
+        bool solved = puzzleDefinition.winCondition switch
+        {
+            WinCondition.BoardsIdentical => CheckBoardsIdentical(),
+            WinCondition.BoardsMirrored => CheckBoardsMirrored(),
+            WinCondition.BoardsRotated => CheckBoardsRotated(),
+            WinCondition.SpecificPattern => CheckSpecificPattern(),
+            _ => false
+        };
+
+        if (solved)
+        {
+            Debug.Log("Puzzle solved!");
+            playerManager.PuzzleSolved();
+            Invoke(nameof(LoadNextPuzzle), 2f);
+        }
+
+        return solved;
+    }
+
+    private bool CheckBoardsIdentical()
+    {
+        if (player1Cubes.Count != player2Cubes.Count)
+            return false;
+
+        for (int i = 0; i < player1Cubes.Count; i++)
+        {
+            if (player1Cubes[i].Data.state != player2Cubes[i].Data.state)
+                return false;
+        }
+
+        return true;
+    }
+
+    private bool CheckBoardsMirrored()
+    {
+        int columns = puzzleDefinition.columns;
+        int rows = puzzleDefinition.rows;
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                int indexA = row * columns + col;
+                int indexB = row * columns + (columns - 1 - col);
+
+                if (player1Cubes[indexA].Data.state !=
+                    player2Cubes[indexB].Data.state)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private bool CheckBoardsRotated()
+    {
+        int count = player1Cubes.Count;
+
+        for (int i = 0; i < count; i++)
+        {
+            int rotatedIndex = count - 1 - i;
+
+            if (player1Cubes[i].Data.state !=
+                player2Cubes[rotatedIndex].Data.state)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool CheckSpecificPattern()
+    {
+        if (puzzleDefinition.solutionBoard == null)
+            return false;
+
+        if (player2Cubes.Count != puzzleDefinition.solutionBoard.Length)
+            return false;
+
+        for (int i = 0; i < player2Cubes.Count; i++)
+        {
+            if (player2Cubes[i].Data.state !=
+                puzzleDefinition.solutionBoard[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public bool CheckWin_old()
     {
         Debug.Log("Check Win Called!");
 

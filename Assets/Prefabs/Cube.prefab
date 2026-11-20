@@ -126,7 +126,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebbb1b6d16071364aa956510ede09ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TapToChangeColour
-  currentColour: 0
 --- !u!114 &-8084681872877553292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,3 +141,8 @@ MonoBehaviour:
   Data:
     active: 0
     state: 0
+  redClip: {fileID: 8300000, guid: 6828c043e17095747987291ecfa82b5d, type: 3}
+  greenClip: {fileID: 8300000, guid: ded40468a29b1e8458f47c75c1e729d2, type: 3}
+  blueClip: {fileID: 8300000, guid: d7faab38c95d59e4092a99d852d7b36f, type: 3}
+  yellowClip: {fileID: 8300000, guid: 46193dab57960fc42a40c9185b95ffc3, type: 3}
+  blackClip: {fileID: 8300000, guid: e2b6fa9c6981eec48975702526074d74, type: 3}

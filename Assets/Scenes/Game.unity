@@ -1906,7 +1906,18 @@ MonoBehaviour:
   cubePrefab: {fileID: 2380854674220970558, guid: 22bc31b548abea742b076b776bbfd15e, type: 3}
   player1Table: {fileID: 515249916}
   player2Table: {fileID: 1594238119}
-  puzzleDefinition: {fileID: 11400000, guid: caf3ed6b2b1a2e24fb434630a5ebd8a3, type: 2}
+  puzzleDefinitions:
+  - {fileID: 11400000, guid: 75474f79761aa9c4cb6e6c0b36902422, type: 2}
+  - {fileID: 11400000, guid: b77693fbf08297e44b07f67dc1ac9064, type: 2}
+  - {fileID: 11400000, guid: 76300243122b4b640809e240a158d7e9, type: 2}
+  - {fileID: 11400000, guid: abd3437e84e74ec4990e2ac6b0004666, type: 2}
+  - {fileID: 11400000, guid: fc2e0fbe6394585439a275b958da2e30, type: 2}
+  - {fileID: 11400000, guid: 09f6a3b60d2ff964f8e6fd8f8c2c1c84, type: 2}
+  - {fileID: 11400000, guid: 933abb0a9bc1c4d40a0645741973c648, type: 2}
+  - {fileID: 11400000, guid: 46e5b96711540fe49a1ec976811122fe, type: 2}
+  - {fileID: 11400000, guid: 771e1be679f3215499dddbc0c8e6669e, type: 2}
+  - {fileID: 11400000, guid: 3b8c5b5c22acc59428187b31d6ed52b3, type: 2}
+  - {fileID: 11400000, guid: c2fad480097ac9f44a71c85e1edeae75, type: 2}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -2190,7 +2201,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1172876493
 Transform:
   m_ObjectHideFlags: 0

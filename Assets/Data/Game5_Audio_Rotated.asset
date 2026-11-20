@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab4a91423ae7b9248b7e53f4e3365ac6, type: 3}
-  m_Name: EasyGame
+  m_Name: Game5_Audio_Rotated
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDefinition
-  gameName: Easy Game 1
-  gameLevel: 0
-  instructionsPlayer1: Memorise the colours of the cubes - click end turn and pass
-    the phone
-  instructionsPlayer2: Match the colours based on the instructions from the other
-    player
+  gameName: Medium Game 1
+  gameLevel: 1
+  instructionsPlayer1: Memorise the sound pattern.  Listen to each cube and remember
+    its sound and position.  Press End Turn when you are ready.
+  instructionsPlayer2: Recreate the sound pattern rotated by 180 degrees.  The top
+    becomes the bottom and the left becomes the right.
   solutionBoard: 
   scrambleMoves: 10
-  puzzleType: 0
-  winCondition: 0
+  puzzleType: 1
+  winCondition: 2
   columns: 3
-  rows: 1
+  rows: 2
   solutionBoardDefinition:
     cells:
     - active: 1
