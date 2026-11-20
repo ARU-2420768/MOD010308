@@ -4,12 +4,17 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour
 {
 
+    private static PlayerManager playerManager;
+    public static PlayerManager Instance => playerManager;
+
     [SerializeField] private Transform wall;
     [SerializeField] private Camera arCamera;
     [SerializeField] private TextMeshPro player1Instructions;
     [SerializeField] private TextMeshPro player2Instructions;
     [SerializeField] private GameObject player1StartButton;
     [SerializeField] private GameObject player2StartButton;
+    [SerializeField] private TMP_Text player1MemorisedText;
+    [SerializeField] private TMP_Text player2MemorisedText;
     [SerializeField] private GameManager gameManager;
 
     //public bool Player1Active, Player2Active;
@@ -19,12 +24,23 @@ public class PlayerManager : MonoBehaviour
     private bool player1IsMemorising;
     public bool Player1IsMemorising => player1IsMemorising;
 
+    private bool playerHasMemorisedBoard;
+    public bool PlayerHasMemorisedBoard => playerHasMemorisedBoard;
+
     // When turn ends switch handover to true so the code can DetermineWhichPlayer()
     private bool handOverPhase = false;
 
     private bool gameInProgress = false;
 
     public bool GameInProgress => gameInProgress;
+
+    private void Awake()
+    {
+        if (playerManager == null)
+        {
+            playerManager = this;
+        }
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -92,11 +108,47 @@ public class PlayerManager : MonoBehaviour
     public void StartGame()
     {
         player1IsMemorising = Player1Active;
+
+        playerHasMemorisedBoard = false;
+        UpdateMemorisedButtonText();
         Debug.Log($"Player 1 game started is {Player1Active}; Player 2 game started is {Player2Active};");
         gameInProgress = true;
         TurnOnPlayersStartTurnButtons();
         DisplayInstructions();
         gameManager.StartGame();
+    }
+
+
+    private void UpdateMemorisedButtonText()
+    {
+        player1MemorisedText.text = "";
+        player2MemorisedText.text = "";
+
+        if (CurrentPlayerIsMemorising())
+        {
+            if (Player1Active)
+            {
+                player1MemorisedText.text = "Click when you have memorised";
+            }
+            else
+            {
+                player2MemorisedText.text = "Click when you have memorised";
+            }
+        }
+    }
+
+    public void ConfirmBoardMemorised()
+    {
+        if (!CurrentPlayerIsMemorising())
+        {
+            Debug.Log("Only the memorising player can press this.");
+            return;
+        }
+
+        playerHasMemorisedBoard = true;
+        #if UNITY_IOS || UNITY_ANDROID
+            Handheld.Vibrate();
+        #endif
     }
 
     public void PuzzleSolved()
@@ -135,6 +187,11 @@ public class PlayerManager : MonoBehaviour
         {
             collider.enabled = visible;
         }
+    }
+
+    public bool CurrentPlayerIsMemorising()
+    {
+        return Player1Active == player1IsMemorising;
     }
 
 

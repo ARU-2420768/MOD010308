@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab4a91423ae7b9248b7e53f4e3365ac6, type: 3}
-  m_Name: Game5_Audio
+  m_Name: Game10
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDefinition
-  gameName: Medium Game 1
-  gameLevel: 1
-  instructionsPlayer1: Memorise the sound pattern.  Listen to each cube and remember
-    its sound and position.  Press End Turn when you are ready.
-  instructionsPlayer2: Recreate the original sound pattern.  Change the cubes until
-    the board matches Player 1's board.
+  gameName: Hard Game 2
+  gameLevel: 2
+  instructionsPlayer1: Memorise the colour pattern.  Remember the colour and position
+    of every cube.  Press End Turn when you are ready.
+  instructionsPlayer2: Recreate the original colour pattern.  Change the cube colours
+    until the board matches Player 1's board.
   solutionBoard: 
   scrambleMoves: 10
-  puzzleType: 1
+  puzzleType: 0
   winCondition: 0
-  columns: 3
-  rows: 2
+  columns: 4
+  rows: 3
   solutionBoardDefinition:
     cells:
     - active: 1

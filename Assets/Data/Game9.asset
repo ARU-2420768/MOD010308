@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab4a91423ae7b9248b7e53f4e3365ac6, type: 3}
   m_Name: Game9
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDefinition
-  gameName: Epic Game 1
-  gameLevel: 3
+  gameName: Hard Game 1
+  gameLevel: 2
   instructionsPlayer1: Memorise the colour pattern.  Remember the colour and position
     of every cube.  Press End Turn when you are ready.
   instructionsPlayer2: Recreate the original colour pattern.  Change the cube colours
@@ -23,7 +23,7 @@ MonoBehaviour:
   puzzleType: 0
   winCondition: 0
   columns: 5
-  rows: 3
+  rows: 2
   solutionBoardDefinition:
     cells:
     - active: 1

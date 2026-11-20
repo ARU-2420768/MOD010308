@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class ARRaycastTouchManager : MonoBehaviour
 {
@@ -34,6 +35,11 @@ public class ARRaycastTouchManager : MonoBehaviour
                         Debug.Log("Memorising player cannot change colours");
                         break;
                     }
+                    if (GameManager.Instance.PuzzleSolved)
+                    {
+                        Debug.Log("Puzzle already solved");
+                        break;
+                    }
                     Debug.Log("Change Colour Now");
                     TapToChangeColour colourCube = hit.collider.GetComponent<TapToChangeColour>();
                     if (colourCube != null)
@@ -65,7 +71,26 @@ public class ARRaycastTouchManager : MonoBehaviour
                         chooseLevel.SelectLevel();
                     }
                     break;
-            }
+                case "Memorised":
+                    if (!PlayerManager.Instance.CurrentPlayerIsMemorising())
+                    {
+                        Debug.Log("Wrong player");
+                        return;
+                    }
+
+                    Debug.Log("Have Memorised");
+
+                    PlayerManager.Instance.ConfirmBoardMemorised();
+                    hit.collider.GetComponentInChildren<TMP_Text>().text = "Solution Memorised";
+                    /*
+                    GameManager.Instance.CanCurrentPlayerChangeColours()
+                    ChooseLevel chooseLevel = hit.collider.GetComponent<ChooseLevel>();
+                    if (chooseLevel != null)
+                    {
+                        chooseLevel.SelectLevel();
+                    }
+                    */
+                    break;            }
 
 
         }

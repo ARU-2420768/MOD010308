@@ -10,6 +10,7 @@ TagManager:
   - ChangePlayerCube
   - StartGame
   - ChooseLevel
+  - Memorised
   layers:
   - Default
   - TransparentFX

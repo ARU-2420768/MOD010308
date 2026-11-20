@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab4a91423ae7b9248b7e53f4e3365ac6, type: 3}
-  m_Name: Game5_Audio_Rotated
+  m_Name: Game6_Haptic
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDefinition
   gameName: Medium Game 1
   gameLevel: 1
-  instructionsPlayer1: Memorise the sound pattern.  Listen to each cube and remember
-    its sound and position.  Press End Turn when you are ready.
-  instructionsPlayer2: Recreate the sound pattern rotated by 180 degrees.  The top
-    becomes the bottom and the left becomes the right.
+  instructionsPlayer1: Memorise the vibration pattern.  Feel each cube and remember
+    its vibration and position.  Press End Turn when you are ready.
+  instructionsPlayer2: Recreate the original vibration pattern.  Change the cubes
+    until the board matches Player 1's board.
   solutionBoard: 
   scrambleMoves: 10
-  puzzleType: 1
-  winCondition: 2
+  puzzleType: 2
+  winCondition: 0
   columns: 3
   rows: 2
   solutionBoardDefinition:

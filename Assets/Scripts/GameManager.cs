@@ -23,6 +23,10 @@ public class GameManager : MonoBehaviour
     private List<PuzzleCube> player2Cubes = new();
     private IPuzzleFeedback feedbackSystem;
 
+    private bool puzzleSolved = false;
+
+    public bool PuzzleSolved => puzzleSolved;
+
     public void Awake()
     {
         if (gameManager == null)
@@ -46,7 +50,7 @@ public class GameManager : MonoBehaviour
     {
         puzzleDefinition = newPuzzle;
         ConfigurePuzzleType();
-        StartGame();
+        //StartGame();
     }
 
     private void ClearBoards()
@@ -94,6 +98,7 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        puzzleSolved = false;
         ClearBoards();
         BoardDefinition solutionBoard = GenerateSolutionBoard();
         CreatePlayerBoard(player1Table, solutionBoard, player1Cubes);
@@ -147,6 +152,9 @@ public class GameManager : MonoBehaviour
             case PuzzleType.HapticMatch:
                 feedbackSystem = new HapticFeedback();
                 break;
+            case PuzzleType.Simon:
+                feedbackSystem = new SimonFeedback();
+                break;    
         }
     }
 
@@ -180,13 +188,21 @@ public class GameManager : MonoBehaviour
 
     private void ScrambleBoard(List<PuzzleCube> cubes, int moves)
     {
+        List<int> available = new();
+
+        for (int i = 0; i < cubes.Count; i++)
+            available.Add(i);
+
+        moves = Mathf.Min(moves, available.Count);
+
         for (int i = 0; i < moves; i++)
         {
-            int cubeIndex = Random.Range(0, cubes.Count);
+            int randomPos = Random.Range(0, available.Count);
+            int cubeIndex = available[randomPos];
+
+            available.RemoveAt(randomPos);
 
             cubes[cubeIndex].Data.state = GetRandomColourState();
-
-            // Refresh visual
             cubes[cubeIndex].ShowColour();
         }
     }
@@ -229,15 +245,19 @@ public class GameManager : MonoBehaviour
             WinCondition.BoardsIdentical => CheckBoardsIdentical(),
             WinCondition.BoardsMirrored => CheckBoardsMirrored(),
             WinCondition.BoardsRotated => CheckBoardsRotated(),
-            WinCondition.SpecificPattern => CheckSpecificPattern(),
             _ => false
         };
 
         if (solved)
         {
             Debug.Log("Puzzle solved!");
+            puzzleSolved = true;
             playerManager.PuzzleSolved();
-            Invoke(nameof(LoadNextPuzzle), 2f);
+            #if UNITY_IOS || UNITY_ANDROID
+                Handheld.Vibrate();
+            #endif
+            LoadNextPuzzle();
+            //Invoke(nameof(LoadNextPuzzle), 2f);
         }
 
         return solved;
@@ -298,25 +318,6 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    private bool CheckSpecificPattern()
-    {
-        if (puzzleDefinition.solutionBoard == null)
-            return false;
-
-        if (player2Cubes.Count != puzzleDefinition.solutionBoard.Length)
-            return false;
-
-        for (int i = 0; i < player2Cubes.Count; i++)
-        {
-            if (player2Cubes[i].Data.state !=
-                puzzleDefinition.solutionBoard[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
     public bool CheckWin_old()
     {
