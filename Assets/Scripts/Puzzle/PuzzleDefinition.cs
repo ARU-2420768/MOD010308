@@ -23,6 +23,10 @@ public class PuzzleDefinition : ScriptableObject
 
     [Header("Simon")]
     public int simonSequenceLength = 5;
+    public int targetRounds = 10;
+    public float startingTimer = 8f;
+    public float timerReductionPerRound = 0.5f;
+    public float minimumTimer = 2f;
     public float simonFlashDuration = 0.5f;
     public float simonPauseDuration = 0.25f;
     public bool randomiseSequence = true;

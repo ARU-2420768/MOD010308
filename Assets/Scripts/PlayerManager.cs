@@ -16,6 +16,8 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private TMP_Text player1MemorisedText;
     [SerializeField] private TMP_Text player2MemorisedText;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private Material waitingMaterial; // Red
+    [SerializeField] private Material completedMaterial; // Green
 
     //public bool Player1Active, Player2Active;
     private bool Player1Active;
@@ -160,20 +162,26 @@ public class PlayerManager : MonoBehaviour
 
     private void TurnOnPlayersStartTurnButtons()
     {
-        Debug.Log(
-        $"GameInProgress={gameInProgress} " +
-        $"Player1Active={Player1Active} " +
-        $"Player2Active={Player2Active}"
-    );
+
         if (gameInProgress)
         {
+
             SetStartButtonVisible(player1StartButton, false);
             SetStartButtonVisible(player2StartButton, false);
             return;
         }
 
+
         SetStartButtonVisible(player1StartButton, Player1Active);
         SetStartButtonVisible(player2StartButton, Player2Active);
+        SetButtonMaterial(player1StartButton, Player1Active);
+        SetButtonMaterial(player2StartButton, Player2Active);
+        
+    }
+
+    private void SetButtonMaterial(GameObject button, bool active)
+    {
+        button.GetComponent<Renderer>().material = active ?completedMaterial: waitingMaterial;
     }
 
     private void SetStartButtonVisible(GameObject startButton, bool visible)
