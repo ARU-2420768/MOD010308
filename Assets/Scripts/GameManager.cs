@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform player2Table;
     [SerializeField] private PuzzleDefinition[] puzzleDefinitions;
 
+    public GamePhase CurrentPhase;
     private int currentPuzzleIndex = 0;
     private PuzzleDefinition puzzleDefinition;
 
