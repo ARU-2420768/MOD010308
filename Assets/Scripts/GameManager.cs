@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform player1Table;
     [SerializeField] private Transform player2Table;
     [SerializeField] private PuzzleDefinition[] puzzleDefinitions;
+    [SerializeField] private SimonManager simonManager;
 
     public GamePhase CurrentPhase;
     private int currentPuzzleIndex = 0;
@@ -23,6 +24,8 @@ public class GameManager : MonoBehaviour
     private List<PuzzleCube> player1Cubes = new();
     private List<PuzzleCube> player2Cubes = new();
     private IPuzzleFeedback feedbackSystem;
+
+
 
     private bool puzzleSolved = false;
 
@@ -45,6 +48,13 @@ public class GameManager : MonoBehaviour
         puzzleDefinition = puzzleDefinitions[currentPuzzleIndex];
 
         ConfigurePuzzleType();
+    }
+
+    public List<PuzzleCube> GetCurrentBoard()
+    {
+        return playerManager.IsPlayer1Active()
+            ? player1Cubes
+            : player2Cubes;
     }
 
     public void ChangePuzzleDefinition(PuzzleDefinition newPuzzle)
@@ -97,15 +107,23 @@ public class GameManager : MonoBehaviour
         );
     }
 
+
+
     public void StartGame()
     {
         puzzleSolved = false;
+
+
         ClearBoards();
         BoardDefinition solutionBoard = GenerateSolutionBoard();
         CreatePlayerBoard(player1Table, solutionBoard, player1Cubes);
         CreatePlayerBoard(player2Table, solutionBoard, player2Cubes);
-        //        CreatePlayerBoard(player1Table, puzzleDefinition.solutionBoardDefinition, player1Cubes);
-        //        CreatePlayerBoard(player2Table, puzzleDefinition.solutionBoardDefinition, player2Cubes);
+
+        if (puzzleDefinition.puzzleType == PuzzleType.Simon)
+        {
+            simonManager.StartSimon();
+            return;
+        }
         SetupPuzzle();
         SwitchPlayer();
     }
@@ -155,7 +173,7 @@ public class GameManager : MonoBehaviour
                 break;
             case PuzzleType.Simon:
                 feedbackSystem = new SimonFeedback();
-                break;    
+                break;
         }
     }
 
@@ -254,9 +272,9 @@ public class GameManager : MonoBehaviour
             Debug.Log("Puzzle solved!");
             puzzleSolved = true;
             playerManager.PuzzleSolved();
-            #if UNITY_IOS || UNITY_ANDROID
-                Handheld.Vibrate();
-            #endif
+#if UNITY_IOS || UNITY_ANDROID
+            Handheld.Vibrate();
+#endif
             LoadNextPuzzle();
             //Invoke(nameof(LoadNextPuzzle), 2f);
         }
@@ -405,6 +423,7 @@ public class GameManager : MonoBehaviour
                     active = true,
                     state = board.cells[i].startingState
                 });
+            puzzleCube.CubeIndex = i;
 
             cubeList.Add(puzzleCube);
         }

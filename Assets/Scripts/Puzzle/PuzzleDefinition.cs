@@ -11,15 +11,17 @@ public class PuzzleDefinition : ScriptableObject
     public PuzzleType puzzleType;
 
     [Header("Cubes Dimensions")]
-    [Range(1,5)]
+    [Range(1, 5)]
     public int columns = 5;
-    [Range(1,3)]
+    [Range(1, 3)]
     public int rows = 3;
 
     [Header("Colour Match")]
     public int scrambleMoves = 10;
     public WinCondition winCondition;
 
+    [Header("Wall")]
+    public int wallDamage = 5;
 
     [Header("Simon")]
     public int simonSequenceLength = 5;

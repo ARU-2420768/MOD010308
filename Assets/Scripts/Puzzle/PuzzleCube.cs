@@ -5,6 +5,9 @@ public class PuzzleCube : MonoBehaviour
 {
     public CubeData Data;
 
+    public int CubeIndex;
+    private Color originalColour;
+
     private Renderer cubeRenderer;
 
     private AudioSource audioSource;
@@ -15,8 +18,19 @@ public class PuzzleCube : MonoBehaviour
     {
         cubeRenderer = GetComponent<Renderer>();
         audioSource = GetComponent<AudioSource>();
+        originalColour = cubeRenderer.material.color;
     }
 
+    public void Normal()
+    {
+        ShowColour();
+    }
+    public void Highlight()
+    {
+        cubeRenderer.material.color = Color.cyan;
+
+        PlaySound();
+    }
     public void Initialise(CubeData data)
     {
         Data = data;
@@ -57,6 +71,8 @@ public class PuzzleCube : MonoBehaviour
                 break;
         }
     }
+
+
 
     public void PlaySound()
     {

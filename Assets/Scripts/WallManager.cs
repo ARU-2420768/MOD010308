@@ -10,6 +10,22 @@ public class WallManager : MonoBehaviour
     [SerializeField]
     private int wallHealth = 100;
 
+    [ContextMenu("Damage 25")]
+    private void Damage25()
+    {
+        DamageWall(25);
+    }
+    [ContextMenu("Reset Wall")]
+    private void ResetWall()
+    {
+        wallHealth = 100;
+        UpdateVisuals();
+    }
+    private void Start()
+    {
+        UpdateVisuals();
+    }
+
     public void DamageWall(int amount)
     {
         wallHealth -= amount;
@@ -24,12 +40,39 @@ public class WallManager : MonoBehaviour
 
     private void UpdateVisuals()
     {
-        Debug.Log("Wall Manager Update Visuals");
+        intactWall.SetActive(false);
+        crackedWall.SetActive(false);
+        smallGapWall.SetActive(false);
+        largeGapWall.SetActive(false);
+
+        if (wallHealth > 75)
+        {
+            intactWall.SetActive(true);
+        }
+        else if (wallHealth > 50)
+        {
+            crackedWall.SetActive(true);
+        }
+        else if (wallHealth > 25)
+        {
+            smallGapWall.SetActive(true);
+        }
+        else if (wallHealth > 0)
+        {
+            largeGapWall.SetActive(true);
+        }
+
+        Debug.Log($"Wall Health: {wallHealth}");
     }
 
     private void DestroyWall()
     {
-        Debug.Log("Wall Manager Destroy Wall");
+        intactWall.SetActive(false);
+        crackedWall.SetActive(false);
+        smallGapWall.SetActive(false);
+        largeGapWall.SetActive(false);
+
+        Debug.Log("Wall Destroyed");
     }
 
 }

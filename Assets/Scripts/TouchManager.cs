@@ -40,10 +40,33 @@ public class ARRaycastTouchManager : MonoBehaviour
                         Debug.Log("Puzzle already solved");
                         break;
                     }
-                    Debug.Log("Change Colour Now");
                     TapToChangeColour colourCube = hit.collider.GetComponent<TapToChangeColour>();
-                    if (colourCube != null)
+                    PuzzleCube puzzleCube = hit.collider.GetComponent<PuzzleCube>();
+
+                    if (colourCube == null || puzzleCube == null)
                     {
+                        Debug.LogError("Missing component");
+                        return;
+                    }
+
+                    Debug.Log($"Cube Index = {puzzleCube.CubeIndex}");
+
+                    Debug.Log($"Simon Manager = {SimonManager.Instance}");
+
+                    if (GameManager.Instance._puzzleDefinition.puzzleType == PuzzleType.Simon)
+                    {
+                        SimonManager.Instance.CheckInput(puzzleCube.CubeIndex);
+
+                    }
+                    else
+                    {
+                        if (!GameManager.Instance.CanCurrentPlayerChangeColours())
+                        {
+                            Debug.Log("Memorising player cannot change colours");
+                            break;
+                        }
+                        Debug.Log("Change Colour Now");
+
                         colourCube.LoopThroughColours();
                     }
                     break;
@@ -90,7 +113,8 @@ public class ARRaycastTouchManager : MonoBehaviour
                         chooseLevel.SelectLevel();
                     }
                     */
-                    break;            }
+                    break;
+            }
 
 
         }
