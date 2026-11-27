@@ -1,12 +1,10 @@
-using UnityEngine;
 using System.Collections.Generic;
-using NUnit.Framework.Interfaces;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     private static GameManager gameManager;
     public static GameManager Instance => gameManager;
-
 
     [SerializeField] private PlayerManager playerManager;
     [SerializeField] private GameObject cubePrefab;
@@ -14,21 +12,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform player2Table;
     [SerializeField] private PuzzleDefinition[] puzzleDefinitions;
     [SerializeField] private SimonManager simonManager;
+    [SerializeField] private AnchoredCubeSwapper cubeSwapper;
 
     public GamePhase CurrentPhase;
     private int currentPuzzleIndex = 0;
     private PuzzleDefinition puzzleDefinition;
 
-
     public PuzzleDefinition _puzzleDefinition => puzzleDefinition;
-    private List<PuzzleCube> player1Cubes = new();
-    private List<PuzzleCube> player2Cubes = new();
+    private readonly List<PuzzleCube> player1Cubes = new();
+    private readonly List<PuzzleCube> player2Cubes = new();
     private IPuzzleFeedback feedbackSystem;
 
-
-
     private bool puzzleSolved = false;
-
     public bool PuzzleSolved => puzzleSolved;
 
     public void Awake()
@@ -37,7 +32,6 @@ public class GameManager : MonoBehaviour
             gameManager = this;
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
         if (puzzleDefinitions == null || puzzleDefinitions.Length == 0)
@@ -45,8 +39,8 @@ public class GameManager : MonoBehaviour
             Debug.LogError("No PuzzleDefinitions assigned.");
             return;
         }
-        puzzleDefinition = puzzleDefinitions[currentPuzzleIndex];
 
+        puzzleDefinition = puzzleDefinitions[currentPuzzleIndex];
         ConfigurePuzzleType();
     }
 
@@ -61,25 +55,30 @@ public class GameManager : MonoBehaviour
     {
         puzzleDefinition = newPuzzle;
         ConfigurePuzzleType();
-        //StartGame();
     }
 
     private void ClearBoards()
     {
         foreach (PuzzleCube cube in player1Cubes)
         {
-            Destroy(cube.gameObject);
+            if (cube != null)
+                Destroy(cube.gameObject);
         }
 
         foreach (PuzzleCube cube in player2Cubes)
         {
-            Destroy(cube.gameObject);
+            if (cube != null)
+                Destroy(cube.gameObject);
         }
 
         player1Cubes.Clear();
         player2Cubes.Clear();
-    }
 
+        if (cubeSwapper != null)
+        {
+            cubeSwapper.ClearBoard();
+        }
+    }
 
     public void LoadNextPuzzle()
     {
@@ -88,50 +87,45 @@ public class GameManager : MonoBehaviour
         if (currentPuzzleIndex >= puzzleDefinitions.Length)
         {
             Debug.Log("All puzzles completed!");
-
-            currentPuzzleIndex = 0; // optional restart
-
-            // TODO:
-            // Show victory screen
-            // Return to menu
-            // Restart sequence
+            currentPuzzleIndex = 0;
             return;
         }
 
-        ChangePuzzleDefinition(
-            puzzleDefinitions[currentPuzzleIndex]
-        );
-
-        Debug.Log(
-            $"Loaded puzzle: {puzzleDefinition.gameName}"
-        );
+        ChangePuzzleDefinition(puzzleDefinitions[currentPuzzleIndex]);
+        Debug.Log($"Loaded puzzle: {puzzleDefinition.gameName}");
     }
-
-
 
     public void StartGame()
     {
         puzzleSolved = false;
-
-
         ClearBoards();
+
         BoardDefinition solutionBoard = GenerateSolutionBoard();
+
+        if (puzzleDefinition.puzzleType == PuzzleType.PatternShift && cubeSwapper != null)
+        {
+            CurrentPhase = GamePhase.PatternMatching;
+            _ = cubeSwapper.SetupBoard(player1Table, puzzleDefinition, solutionBoard);
+            return;
+        }
+
         CreatePlayerBoard(player1Table, solutionBoard, player1Cubes);
         CreatePlayerBoard(player2Table, solutionBoard, player2Cubes);
 
         if (puzzleDefinition.puzzleType == PuzzleType.Simon)
         {
+            CurrentPhase = GamePhase.Simon;
             simonManager.StartSimon();
             return;
         }
+
+        CurrentPhase = GamePhase.PatternMatching;
         SetupPuzzle();
         SwitchPlayer();
     }
 
     public void SwitchPlayer()
     {
-        //SetBoardVisible(player1Cubes, !GameManager.Instance.CanCurrentPlayerChangeColours());
-        //SetBoardVisible(player2Cubes, !GameManager.Instance.CanCurrentPlayerChangeColours());
         SetBoardVisible(player1Cubes, playerManager.IsPlayer1Active());
         SetBoardVisible(player2Cubes, !playerManager.IsPlayer1Active());
     }
@@ -139,9 +133,7 @@ public class GameManager : MonoBehaviour
     private BoardDefinition GenerateSolutionBoard()
     {
         BoardDefinition board = new BoardDefinition();
-
         int cellCount = puzzleDefinition.rows * puzzleDefinition.columns;
-
         board.cells = new CellDefinition[cellCount];
 
         for (int i = 0; i < cellCount; i++)
@@ -171,8 +163,13 @@ public class GameManager : MonoBehaviour
             case PuzzleType.HapticMatch:
                 feedbackSystem = new HapticFeedback();
                 break;
+
             case PuzzleType.Simon:
                 feedbackSystem = new SimonFeedback();
+                break;
+
+            case PuzzleType.PatternShift:
+                feedbackSystem = new ColourFeedback();
                 break;
         }
     }
@@ -181,11 +178,10 @@ public class GameManager : MonoBehaviour
     {
         foreach (PuzzleCube cube in cubes)
         {
-            cube.GetComponent<Renderer>().enabled = visible;
+            if (cube != null)
+                cube.GetComponent<Renderer>().enabled = visible;
         }
     }
-
-
 
     private List<PuzzleCube> GetGuessingPlayerBoard()
     {
@@ -194,15 +190,10 @@ public class GameManager : MonoBehaviour
 
     private void SetupPuzzle()
     {
-        Debug.Log(
-            $"Scrambling board. Player1Active={playerManager.IsPlayer1Active()}"
-        );
+        Debug.Log($"Scrambling board. Player1Active={playerManager.IsPlayer1Active()}");
         List<PuzzleCube> board = GetGuessingPlayerBoard();
-
         Debug.Log($"Guessing board has {board.Count} cubes");
-
-        //ScrambleBoard(board, 3);
-        ScrambleBoard(GetGuessingPlayerBoard(), 3);
+        ScrambleBoard(board, 3);
     }
 
     private void ScrambleBoard(List<PuzzleCube> cubes, int moves)
@@ -218,7 +209,6 @@ public class GameManager : MonoBehaviour
         {
             int randomPos = Random.Range(0, available.Count);
             int cubeIndex = available[randomPos];
-
             available.RemoveAt(randomPos);
 
             cubes[cubeIndex].Data.state = GetRandomColourState();
@@ -231,7 +221,6 @@ public class GameManager : MonoBehaviour
         bool result = playerManager.IsPlayer1Active() != playerManager.Player1IsMemorising;
         Debug.Log($"CanChangeColours: Player1Active={playerManager.IsPlayer1Active()}, Memorising={playerManager.Player1IsMemorising}, Result={result}");
         return result;
-
     }
 
     private CubeState GetRandomColourState()
@@ -248,24 +237,26 @@ public class GameManager : MonoBehaviour
         return colours[Random.Range(0, colours.Length)];
     }
 
-    private CubeState GetNextState(CubeState currentState)
-    {
-        int stateCount = System.Enum.GetValues(typeof(CubeState)).Length;
-
-        int nextState = ((int)currentState + 1) % stateCount;
-
-        return (CubeState)nextState;
-    }
-
     public bool CheckWin()
     {
-        bool solved = puzzleDefinition.winCondition switch
+        bool solved;
+
+        if (puzzleDefinition.puzzleType == PuzzleType.PatternShift && cubeSwapper != null)
         {
-            WinCondition.BoardsIdentical => CheckBoardsIdentical(),
-            WinCondition.BoardsMirrored => CheckBoardsMirrored(),
-            WinCondition.BoardsRotated => CheckBoardsRotated(),
-            _ => false
-        };
+            solved = puzzleDefinition.targetPattern != null && puzzleDefinition.targetPattern.Length > 0
+                ? cubeSwapper.MatchesPattern(puzzleDefinition.targetPattern)
+                : false;
+        }
+        else
+        {
+            solved = puzzleDefinition.winCondition switch
+            {
+                WinCondition.BoardsIdentical => CheckBoardsIdentical(),
+                WinCondition.BoardsMirrored => CheckBoardsMirrored(),
+                WinCondition.BoardsRotated => CheckBoardsRotated(),
+                _ => false
+            };
+        }
 
         if (solved)
         {
@@ -276,7 +267,6 @@ public class GameManager : MonoBehaviour
             Handheld.Vibrate();
 #endif
             LoadNextPuzzle();
-            //Invoke(nameof(LoadNextPuzzle), 2f);
         }
 
         return solved;
@@ -301,6 +291,9 @@ public class GameManager : MonoBehaviour
         int columns = puzzleDefinition.columns;
         int rows = puzzleDefinition.rows;
 
+        if (player1Cubes.Count < rows * columns || player2Cubes.Count < rows * columns)
+            return false;
+
         for (int row = 0; row < rows; row++)
         {
             for (int col = 0; col < columns; col++)
@@ -321,6 +314,9 @@ public class GameManager : MonoBehaviour
 
     private bool CheckBoardsRotated()
     {
+        if (player1Cubes.Count != player2Cubes.Count)
+            return false;
+
         int count = player1Cubes.Count;
 
         for (int i = 0; i < count; i++)
@@ -334,45 +330,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        return true;
-    }
-
-
-    public bool CheckWin_old()
-    {
-        Debug.Log("Check Win Called!");
-
-        for (int i = 0; i < player1Cubes.Count; i++)
-        {
-            Debug.Log(
-                $"Cube {i}: " +
-                $"P1={player1Cubes[i].Data.state}, " +
-                $"P2={player2Cubes[i].Data.state}");
-        }
-
-        if (player1Cubes.Count != player2Cubes.Count)
-        {
-            Debug.LogError("Player board sizes differ.");
-            return false;
-        }
-
-        for (int i = 0; i < player1Cubes.Count; i++)
-        {
-            if (player1Cubes[i].Data.state !=
-                player2Cubes[i].Data.state)
-            {
-                Debug.Log(
-                    $"Cube {i} mismatch. " +
-                    $"P1={player1Cubes[i].Data.state}, " +
-                    $"P2={player2Cubes[i].Data.state}"
-                );
-
-                return false;
-            }
-        }
-
-        Debug.Log("Puzzle solved!");
-        playerManager.PuzzleSolved();
         return true;
     }
 
@@ -428,6 +385,4 @@ public class GameManager : MonoBehaviour
             cubeList.Add(puzzleCube);
         }
     }
-
-
 }

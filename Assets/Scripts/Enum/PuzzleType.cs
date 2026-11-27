@@ -4,5 +4,6 @@ public enum PuzzleType
     SoundMatch,
     HapticMatch,
     Simon,
-    Mixed
+    Mixed,
+    PatternShift
 }
